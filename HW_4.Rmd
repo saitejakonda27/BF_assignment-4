@@ -1,0 +1,89 @@
+---
+title: "Lecture 4"
+author: "shivangsingh.manhas@rutgers.edu"
+date: "10/08/2023"
+output: html_document
+---
+  
+```{r}
+library(fpp)
+library(fpp2)
+library(TTR)
+#Importing Dataset
+library(readxl)
+AirPassengers_1 <- read_excel("~/Documents/AirPassengers_1.xlsx")
+View(AirPassengers_1)
+```
+
+```{r}
+attributes(AirPassengers_1)
+Acf(AirPassengers_1)
+```
+
+```{r}
+#Converting the data to a time series object
+ts_data <- ts(AirPassengers_1$Passengers, start = c(1958, 1),end = c(1960, 12), frequency = 12)
+```
+
+```{r}
+#Mean forecast
+mean_forecast <- meanf(ts_data,5)
+plot(mean_forecast)
+```
+
+```{r}
+#Naive Forecast
+naive_forecast <- naive(ts_data,5)
+plot(naive_forecast)
+
+rwf_forecast <- rwf(ts_data,5)
+rwf_forecast <- rwf(ts_data,5, drift=TRUE)
+
+# Seasonal Naive
+snaive_forecast <- snaive(ts_data,5)
+```
+
+```{r}
+# Moving Averages
+
+MA1_forecast <- ma(AirPassengers_1,order=5)
+MA2_forecast <- ma(AirPassengers_1,order=9)
+```
+
+```{r}
+#Plotting the time series and different model forecasts
+plot(mean_forecast)
+lines(naive_forecast$mean,col="purple")
+lines(rwf_forecast$mean,col="blue")
+lines(snaive_forecast$mean,col="yellow")
+plot(MA1_forecast,col = "red")
+plot(MA2_forecast,col = "green")
+```
+```{r}
+# Decomposition
+ets_forecast <- ets(ts_data)
+plot(ets_forecast)
+attributes(ets_forecast)
+ets_forecast$mse
+```
+```{r}
+# HoltWinters Forecasting
+HW_forecast <- HoltWinters(ts_data)
+plot(HW_forecast)
+SSE_Simple <- HoltWinters(ts_data,beta=FALSE,gamma=FALSE)
+attributes(SSE_Simple)
+plot(SSE_Simple)
+SSE_Simple$SSE
+head(SSE_Simple$fitted)
+```
+```{r}
+#Comparing the forecasting models using accuracy measure and stating the best model based on the accuracy comparison
+
+accuracy(naive_forecast)
+accuracy(rwf_forecast)
+accuracy(ets_forecast)
+print("According to the accuracy results, I assume that the ets predictions are more accurate since their mean is close to 0 and most other errors also have their data closer to 0")
+```
+
+
+
